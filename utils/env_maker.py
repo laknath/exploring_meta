@@ -4,7 +4,9 @@ from learn2learn.gym import AsyncVectorEnv
 import gym
 import utils
 
-mujoco_envs = ['Particles2D-v1', 'AntDirection-v1']
+mujoco_envs = ['HalfCheetahPT-v2', 'HopperPT-v2', 
+                'Walker2dPT-v2', 'AntPT-v2', 'SwimmerPT-v2', 'HumanoidPT-v2', 
+                'HalfCheetahMetaDir-v2', 'AntDirection-v1', ]
 metaworld_envs = ['ML1_reach-v1', 'ML1_pick-place-v1', 'ML1_push-v1', 'ML10', 'ML45']
 
 

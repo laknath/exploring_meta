@@ -1,7 +1,16 @@
 from learn2learn.gym.envs.meta_env import MetaEnv
-from metaworld.envs.mujoco.multitask_env import MultiClassMultiTaskEnv
-from metaworld.benchmarks import ML1, ML10, ML45
+#from metaworld.envs.mujoco.multitask_env import MultiClassMultiTaskEnv
+from learn2learn.gym.envs.mujoco.dummy_mujoco_env import MujocoEnv as MultiClassMultiTaskEnv
+#from metaworld.benchmarks import ML1, ML10, ML45
 
+class ML1:
+    pass
+
+class ML10:
+    pass
+
+class ML45:
+    pass
 
 class MetaWorldMod(MultiClassMultiTaskEnv, MetaEnv):
     """
