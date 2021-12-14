@@ -16,8 +16,8 @@ from collections import defaultdict
 from utils import make_env
 from core_functions.runner import Runner
 
-device = torch.device('cpu')
-
+#device = torch.device('cpu')
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 ML10_train_task_names = {
     0: 'reach',
@@ -266,9 +266,12 @@ def fast_adapt_ppo(task, learner, baseline, params, anil=False, render=False):
     if anil:
         learner.module.turn_off_body_grads()
 
+    total_steps = 0
     for step in range(params['adapt_steps']):
         # Collect adaptation / support episodes
         support_episodes = task.run(learner, episodes=params['adapt_batch_size'], render=render)
+        total_steps += task.steps_so_far
+        #print("support_episodes", len(support_episodes), "steps so far", task.steps_so_far)
 
         # Get values to device
         states, actions, rewards, dones, next_states = get_episode_values(support_episodes)
@@ -313,7 +316,7 @@ def fast_adapt_ppo(task, learner, baseline, params, anil=False, render=False):
     query_rew = query_episodes.reward().sum().item() / params['adapt_batch_size']
     query_success_rate = get_ep_successes(query_episodes, params['max_path_length']) / params['adapt_batch_size']
 
-    return valid_loss, query_rew, query_success_rate
+    return valid_loss, query_rew, query_success_rate, total_steps
 
 
 def single_ppo_update(episodes, learner, baseline, params, anil=False):

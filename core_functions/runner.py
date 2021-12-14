@@ -3,9 +3,11 @@
 import cherry as ch
 from cherry._utils import _min_size, _istensorable
 from cherry.envs.base import Wrapper
+import torch
 
 from collections import defaultdict
 
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 def flatten_episodes(replay, episodes, num_workers, extra_info=False):
     """
@@ -62,6 +64,7 @@ class Runner(Wrapper):
         self._needs_reset = True
         self._current_state = None
         self._extra_info = extra_info
+        self.steps_so_far = 0
 
     def reset(self, *args, **kwargs):
         self._current_state = self.env.reset(*args, **kwargs)
@@ -95,6 +98,8 @@ class Runner(Wrapper):
         collected_steps = 0
         while True:
             if collected_steps >= steps or collected_episodes >= episodes:
+                self.steps_so_far = collected_steps
+                print("Collected steps", collected_steps, "collected_episodes", episodes)
                 if self.is_vectorized and collected_episodes >= episodes:
                     replay = flatten_episodes(replay, episodes, self.num_envs, extra_info=self._extra_info)
                     self._needs_reset = True
@@ -102,6 +107,7 @@ class Runner(Wrapper):
             if self._needs_reset:
                 self.reset()
             info = {}
+            self._current_state = self._current_state.to(device)
             action = get_action(self._current_state)
             if isinstance(action, tuple):
                 skip_unpack = False
