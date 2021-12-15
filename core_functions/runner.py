@@ -98,7 +98,6 @@ class Runner(Wrapper):
         collected_steps = 0
         while True:
             if collected_steps >= steps or collected_episodes >= episodes:
-                self.steps_so_far = collected_steps
                 print("Collected steps", collected_steps, "collected_episodes", episodes)
                 if self.is_vectorized and collected_episodes >= episodes:
                     replay = flatten_episodes(replay, episodes, self.num_envs, extra_info=self._extra_info)
@@ -161,3 +160,4 @@ class Runner(Wrapper):
             if render:
                 self.env.render()
             collected_steps += 1
+            self.steps_so_far += len(done)
