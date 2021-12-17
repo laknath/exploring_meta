@@ -93,3 +93,11 @@ class Experiment:
         print('Saving accuracy matrix..')
         print(acc_matrix)
         np.savetxt(self.model_path + '/acc_matrix.out', acc_matrix, fmt='%1.2f')
+
+    def load_model(self, model, path, name, epoch):
+        print('Loading model' + str(model.__class__) + ' epoch ' + str(epoch) + '...')
+        ckpt_path = os.path.join(path, name+str(epoch)+'.pt')
+        if not os.path.exists(ckpt_path):
+            raise FileNotFoundError(f'Checkpoint {ckpt_path} not found')
+
+        model.load_state_dict(torch.load(ckpt_path))
