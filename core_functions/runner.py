@@ -8,6 +8,7 @@ import torch
 from collections import defaultdict
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+#device = torch.device('cpu')
 
 def flatten_episodes(replay, episodes, num_workers, extra_info=False):
     """
@@ -98,7 +99,7 @@ class Runner(Wrapper):
         collected_steps = 0
         while True:
             if collected_steps >= steps or collected_episodes >= episodes:
-                print("Collected steps", collected_steps, "collected_episodes", episodes)
+                print("Collected steps", collected_steps, "collected_episodes", collected_episodes)
                 if self.is_vectorized and collected_episodes >= episodes:
                     replay = flatten_episodes(replay, episodes, self.num_envs, extra_info=self._extra_info)
                     self._needs_reset = True
@@ -135,6 +136,7 @@ class Runner(Wrapper):
                 self._needs_reset = True
             elif self.is_vectorized:
                 collected_episodes += sum(done)
+                collected_steps += len(done)
                 # Convert tuple info dictionaries (one per worker) in a single
                 # dictionary with a list of values for each key for each worker
                 # e.g from this
@@ -159,5 +161,8 @@ class Runner(Wrapper):
             self._current_state = state
             if render:
                 self.env.render()
-            collected_steps += 1
-            self.steps_so_far += len(done)
+
+            if not self.is_vectorized:
+                collected_steps += 1
+
+            self.steps_so_far = collected_steps
