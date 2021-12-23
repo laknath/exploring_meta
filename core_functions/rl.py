@@ -261,15 +261,19 @@ def evaluate_vpg(env, policy, baseline, eval_params, anil=False, render=False):
 """ PPO RELATED """
 
 
-def fast_adapt_ppo(task, learner, baseline, params, anil=False, render=False):
+def fast_adapt_ppo(task, learner, baseline, params, anil=False, render=False, steps=False):
     # During inner loop adaptation we do not store gradients for the network body
     if anil:
         learner.module.turn_off_body_grads()
 
     total_steps = 0
+    batch_key = 'steps' if steps else 'episodes'
+    run_opts = {batch_key: params['adapt_batch_size'], 'render': render}
+
     for step in range(params['adapt_steps']):
         # Collect adaptation / support episodes
-        support_episodes = task.run(learner, episodes=params['adapt_batch_size'], render=render)
+        support_episodes = task.run(learner, **run_opts)
+        #support_episodes = task.run(learner, steps=params['adapt_batch_size'])
         total_steps += task.steps_so_far
         #print("support_episodes", len(support_episodes), "steps so far", task.steps_so_far)
 
@@ -298,7 +302,8 @@ def fast_adapt_ppo(task, learner, baseline, params, anil=False, render=False):
         learner.module.turn_on_body_grads()
 
     # Collect evaluation / query episodes
-    query_episodes = task.run(learner, episodes=params['adapt_batch_size'])
+    #query_episodes = task.run(learner, episodes=params['adapt_batch_size'])
+    query_episodes = task.run(learner, **run_opts)
     # Get values to device
     states, actions, rewards, dones, next_states = get_episode_values(query_episodes)
     # Update value function & Compute advantages
